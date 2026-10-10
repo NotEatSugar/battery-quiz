@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>整机锂电池基础能力测评 V4.0（NTC专项整合版）</title>
+<style>
+:root{--pri:#2563eb;--pri-l:#dbeafe;--ok:#16a34a;--bad:#dc2626;--bg:#f8fafc;--card:#fff;--txt:#1e293b;--txt-l:#64748b;--bd:#e2e8f0;--r:10px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--txt);line-height:1.7}
+.container{max-width:920px;margin:0 auto;padding:20px 16px 80px}
+.header{background:linear-gradient(135deg,#1e3a5f,#2563eb);color:#fff;padding:32px 24px;border-radius:var(--r);margin-bottom:20px;text-align:center}
+.header h1{font-size:22px;margin-bottom:8px}
+.header .sub{font-size:13px;opacity:.88}
+.info{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.info input{flex:1;min-width:130px;padding:10px 14px;border:1px solid var(--bd);border-radius:8px;font-size:14px}
+.bar-wrap{position:sticky;top:0;z-index:99;background:var(--bg);padding:10px 0}
+.bar{height:6px;background:var(--bd);border-radius:3px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--pri);width:0;transition:width .3s}
+.bar-txt{font-size:12px;color:var(--txt-l);text-align:right;margin-top:4px}
+.sec{font-size:16px;font-weight:700;color:var(--pri);margin:26px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--pri-l)}
+.q{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:18px 20px;margin-bottom:14px}
+.q-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px}
+.q-n{font-weight:700;color:var(--pri);font-size:13px;white-space:nowrap}
+.q-t{flex:1;font-size:15px}
+.q-s{font-size:12px;color:var(--txt-l);background:var(--pri-l);padding:2px 8px;border-radius:12px;white-space:nowrap}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:9px 13px;border:1px solid var(--bd);border-radius:8px;cursor:pointer;font-size:14px;transition:.15s}
+.opt:hover{background:var(--pri-l);border-color:var(--pri)}
+.opt input{margin-top:4px;flex-shrink:0}
+.opt.sel{background:var(--pri-l);border-color:var(--pri)}
+.opt.ok{background:#dcfce7;border-color:var(--ok)}
+.opt.no{background:#fee2e2;border-color:var(--bad)}
+.opt-row{flex-direction:row;gap:16px}
+textarea,input.tin{width:100%;padding:10px 13px;border:1px solid var(--bd);border-radius:8px;font-size:14px;font-family:inherit;margin-top:8px}
+textarea{min-height:90px;resize:vertical}
+.exp{display:none;margin-top:12px;padding:13px 15px;border-radius:8px;font-size:13px;line-height:1.8}
+.exp.show{display:block}
+.exp.ok{background:#f0fdf4;border-left:4px solid var(--ok)}
+.exp.no{background:#fef2f2;border-left:4px solid var(--bad)}
+.exp.info{background:#eff6ff;border-left:4px solid var(--pri)}
+.exp b{display:block;margin-bottom:5px}
+.exp .ans{color:var(--ok);font-weight:600}
+.submit{text-align:center;margin:30px 0}
+.btn{background:var(--pri);color:#fff;border:none;padding:14px 46px;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer}
+.btn:hover{background:#1d4ed8}
+.btn:disabled{background:#94a3b8;cursor:not-allowed}
+.btn2{background:#fff;color:var(--pri);border:2px solid var(--pri);padding:12px 32px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;margin-left:10px}
+.panel{display:none;background:var(--card);border:2px solid var(--pri);border-radius:var(--r);padding:28px;text-align:center;margin-bottom:22px}
+.panel.show{display:block}
+.big{font-size:54px;font-weight:800;color:var(--pri);line-height:1.1}
+.tot{font-size:18px;color:var(--txt-l)}
+.grade{font-size:19px;font-weight:700;margin:12px 0 6px}
+.det{font-size:14px;color:var(--txt-l);margin-top:8px}
+.adv{font-size:14px;background:var(--pri-l);padding:14px 18px;border-radius:8px;margin-top:16px;text-align:left}
+.self{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--txt-l);flex-wrap:wrap}
+.self input{width:80px;padding:6px 10px;border:1px solid var(--bd);border-radius:6px;font-size:14px}
+.res{margin-top:44px}
+.res h2{font-size:20px;color:var(--pri);margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid var(--pri-l)}
+.rg{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:18px 22px;margin-bottom:14px}
+.rg h3{font-size:15px;margin-bottom:10px;padding-left:10px;border-left:3px solid var(--pri)}
+.rg ul{list-style:none}
+.rg li{margin-bottom:9px;font-size:13px}
+.rg a{color:var(--pri);text-decoration:none}
+.rg a:hover{text-decoration:underline}
+.rg .d{color:var(--txt-l);font-size:12px}
+@media(max-width:600px){.header h1{font-size:17px}.big{font-size:42px}.q{padding:15px}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>整机锂电池基础能力测评</h1>
+    <div class="sub">V4.0 NTC专项整合版 · 满分246分 · 建议用时120分钟</div>
+  </div>
+
+  <div class="info">
+    <input id="n1" placeholder="姓名">
+    <input id="n2" placeholder="工号">
+    <input id="n3" placeholder="部门">
+  </div>
+
+  <div class="panel" id="panel">
+    <div class="big" id="bigScore">0</div>
+    <div class="tot">/ 246 分</div>
+    <div class="grade" id="grade"></div>
+    <div class="det" id="detail"></div>
+    <div class="adv" id="advice"></div>
+  </div>
+
+  <div class="bar-wrap">
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="bar-txt" id="barTxt">已答 0 / 84 题</div>
+  </div>
+
+  <form id="form" onsubmit="return false">
+    <div class="sec">第一部分 · 单选题（26题 × 3分 = 78分）</div>
+    <div id="sec-single"></div>
+    <div class="sec">第二部分 · 多选题（10题 × 4分 = 40分）</div>
+    <div id="sec-multi"></div>
+    <div class="sec">第三部分 · 判断题（24题 × 2分 = 48分）</div>
+    <div id="sec-tf"></div>
+    <div class="sec">第四部分 · 填空题（9题 × 2分 = 18分）</div>
+    <div id="sec-fill"></div>
+    <div class="sec">第五部分 · 名词解释（10题 × 3分 = 30分）</div>
+    <div id="sec-term"></div>
+    <div class="sec">第六部分 · 简答题（5题 = 32分）</div>
+    <div id="sec-short"></div>
+  </form>
+
+  <div class="submit" id="submitArea">
+    <button class="btn" id="btnSubmit" onclick="submitQuiz()">提交答卷并查看成绩</button>
+  </div>
+
+  <div class="res" id="res">
+    <h2>📚 学习资源推荐（供学员自行学习查阅）</h2>
+
+    <div class="rg">
+      <h3>一、锂电池基础原理与充电机制</h3>
+      <ul>
+        <li><a href="https://www.ti.com/video/3874333847001" target="_blank" rel="noopener">TI 锂电池充电原理系列课程</a>
+          <span class="d">— 涵盖CC-CV充电、预充电、涓流充电完整充电曲线讲解</span></li>
+        <li><a href="https://www.ti.com/lit/an/sluaaw9/sluaaw9.pdf" target="_blank" rel="noopener">TI Li-Ion Battery Charging Introduction（PDF）</a>
+          <span class="d">— 锂电池充电基础方法论，含CCCV充电曲线、预充电/涓流充电说明</span></li>
+        <li><a href="https://source.android.com/docs/core/power" target="_blank" rel="noopener">Android 电源管理官方文档</a>
+          <span class="d">— BatteryStats服务、电源配置文件、BatteryManager API</span></li>
+        <li><a href="https://developer.android.com/training/monitoring-device-state/battery-monitoring" target="_blank" rel="noopener">Android 电池状态监控开发者指南</a>
+          <span class="d">— BatteryManager、充电状态检测、Intent广播机制</span></li>
+      </ul>
+    </div>
+
+    <div class="rg">
+      <h3>二、电池NTC温度检测与精度测试</h3>
+      <ul>
+        <li><a href="https://patentimages.storage.googleapis.com/85/d8/e5/cef08c876f4292/CN203038986U.pdf" target="_blank" rel="noopener">CN203038986U 动力电池安全顶盖专利（NTC过充保护方案）</a>
+          <span class="d">— NTC在80℃阈值下阻值突变、自放电中断过充的完整原理说明</span></li>
+        <li><a href="https://www.ti.com/lit/an/sluaaj8/sluaaj8.pdf" target="_blank" rel="noopener">TI SLUAAJ8 应用笔记 — 基于电流的电池NTC温度检测</a>
+          <span class="d">— NTC TS引脚网络设计、串联/并联补偿电阻计算、最坏情况跳变温度评估</span></li>
+        <li><a href="https://product.tdk.com.cn/zh/faq/thermistor/faq_ntc-nc/tc.html" target="_blank" rel="noopener">TDK NTC热时间常数测量方法（FAQ）</a>
+          <span class="d">— 油槽阶跃法测试τ的完整步骤：25℃→85℃阶跃，记录63.2%响应时间</span></li>
+        <li><a href="https://www.spc.org.cn/standardDetail/61166" target="_blank" rel="noopener">T/SZBSIA 001-2025 储能类锂电池用温度测量型NTC传感器技术要求及试验方法</a>
+          <span class="d">— 温度误差、热反应时间、绝缘电阻等关键性能指标及试验规范</span></li>
+        <li><a href="https://www.ttbz.org.cn/upload/file/20230717/6382518844974117073165645.pdf" target="_blank" rel="noopener">T/QGCML NTC片式热敏电阻通用技术规范（团体标准）</a>
+          <span class="d">— NTC参数定义（R25、B值、耗散系数δ、热时间常数τ）、试验方法、检验规则</span></li>
+      </ul>
+    </div>
+
+    <div class="rg">
+      <h3>三、JEITA温度管理与充电策略</h3>
+      <ul>
+        <li><a href="https://www.ti.com/lit/ds/symlink/bq25820.pdf" target="_blank" rel="noopener">TI JEITA充电规范数据手册（bq25820）</a>
+          <span class="d">— JEITA四温区定义、各温区充电电流/电压调整策略、温度阈值可编程配置</span></li>
+        <li><a href="https://www.richtek.com/Design%20Support/Technical%20Document/AN033" target="_blank" rel="noopener">Richtek JEITA充电控制应用笔记</a>
+          <span class="d">— JEITA COOL/WARM温区电流设定、安全定时器配合机制</span></li>
+        <li><a href="https://blog.csdn.net/itom1900/article/details/151782729" target="_blank" rel="noopener">MTK Linux Charger驱动分析</a>
+          <span class="d">— mtk_charger.c源码解析，含sw_jeita_data状态机实现</span></li>
+      </ul>
+    </div>
+
+    <div class="rg">
+      <h3>四、Android Thermal温控框架</h3>
+      <ul>
+        <li><a href="https://source.android.com/docs/core/power/thermal-mitigation" target="_blank" rel="noopener">Android 热缓解官方文档</a>
+          <span class="d">— Thermal HAL 2.0、Thermal Service、IThermalEventListener回调、热严重等级定义</span></li>
+        <li><a href="https://developer.android.com/ndk/reference/group/thermal" target="_blank" rel="noopener">Android Thermal NDK API参考</a>
+          <span class="d">— AThermalManager、getThermalHeadroom、热状态回调等API</span></li>
+        <li><a href="https://developer.android.com/games/optimize/thermal-api" target="_blank" rel="noopener">Android 游戏Thermal API指南</a>
+          <span class="d">— 热余量预测、游戏自适应降载策略</span></li>
+      </ul>
+    </div>
+
+    <div class="rg">
+      <h3>五、MTK/展锐平台电池安全策略</h3>
+      <ul>
+        <li><a href="https://wenku.csdn.net/answer/46gxbwz7vi" target="_blank" rel="noopener">展锐平台充电参数DTS配置详解</a>
+          <span class="d">— battery节点配置、温度保护参数（temp-cool-down/warm-up/overheat）</span></li>
+        <li><a href="https://wenku.csdn.net/column/427y3rcrpw" target="_blank" rel="noopener">展锐SL8541E充电热管理专栏</a>
+          <span class="d">— 充电流程优化步骤、充电热管理、安全机制详解</span></li>
+        <li><a href="https://wenku.csdn.net/column/mtk6769_charger" target="_blank" rel="noopener">MTK6769充电驱动开发实战</a>
+          <span class="d">— 设备树解析、JEITA温度保护、动态MIVR与输入电流管理</span></li>
+      </ul>
+    </div>
+
+    <div class="rg">
+      <h3>六、电池安全与测试标准</h3>
+      <ul>
+        <li><a href="https://www.iec.ch/" target="_blank" rel="noopener">IEC 62133 便携式密封二次电池安全标准</a>
+          <span class="d">— 锂电池安全测试国际标准，含过充、短路、温度循环等测试方法</span></li>
+        <li><a href="https://www.ul.com/" target="_blank" rel="noopener">UL 2054 家用与商用电池组安全标准</a>
+          <span class="d">— 电池组安全评估标准</span></li>
+        <li><a href="https://www.gb-gbt.cn/" target="_blank" rel="noopener">GB 31241 便携式电子产品用锂离子电池和电池组安全要求</a>
+          <span class="d">— 中国国家标准，整机电池安全测试依据</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============ 题库数据 ============ */
+const L = ['A','B','C','D','E'];
+
+const DATA = {
+single:[
+{q:"锂离子电池放电时，锂离子主要迁移方向是：",o:["从负极迁移到正极","从正极迁移到负极","从隔膜迁移到外壳","不发生迁移"],a:"A",e:"放电时锂离子从负极脱出，经过电解液和隔膜回到正极；电子经外电路从负极流向正极，对外做功。"},
+{q:"消费类单节锂离子电池的标称电压通常为：",o:["1.2V","1.5V","3.7V","12V"],a:"C",e:"消费类锂离子电池标称电压为3.7V（部分高压电芯为3.8V/3.85V），充电截止电压通常为4.2V/4.35V/4.4V。"},
+{q:"下列通常不作为单节锂离子电池充电截止电压的是：",o:["4.2V","4.35V","4.4V","1.5V"],a:"D",e:"1.5V是碱性/碳性干电池的标称电压，与锂离子电池无关。锂离子充电截止电压常见为4.2V/4.35V/4.4V。"},
+{q:"锂离子电池 CC-CV 充电中，CV 阶段的特点是：",o:["电压恒定，电流逐渐减小","电流恒定，电压逐渐升高","电压和电流均恒定","电压和电流均迅速升高"],a:"A",e:"CV阶段保持充电电压恒定（如4.2V），充电电流根据电芯饱和程度逐渐减小，当降至截止电流（典型0.02C~0.07C）时充电终止。"},
+{q:"电池 SOC 表示：",o:["健康状态","荷电状态","放电深度","循环次数"],a:"B",e:"SOC（State of Charge）即荷电状态，表示电池当前剩余电量百分比。SOH为健康状态，DOD为放电深度。"},
+{q:"一块 3000mAh 的电池以 1C 放电，放电电流为：",o:["300mA","1000mA","3000mA","30A"],a:"C",e:"1C表示以额定容量数值的电流充放电。3000mAh × 1C = 3000mA = 3A。"},
+{q:"电池过放保护后，整机插充电器无反应，优先排查：",o:["屏幕分辨率","保护板是否激活、充电器是否能唤醒","Wi-Fi 模块","蓝牙版本"],a:"B",e:"过放保护后保护IC会切断回路，需确认充电器能否激活保护板。部分平台（如MTK）支持深放电电池的小电流恢复充电机制。"},
+{q:"电池内阻增大，最可能直接导致：",o:["大电流放电压降增大、发热增加","电池容量无限增加","充电截止电压降为0V","对整机无影响"],a:"A",e:"根据欧姆定律ΔV=I×R，内阻增大导致大电流放电时端电压下降增大，功率损耗（I²R）增加，表现为发热加剧、续航缩短。"},
+{q:"锂电池涓流充电阶段的典型电流值是恒流充电电流的：",o:["1/2","1/5","1/10","1/50"],a:"C",e:"涓流充电电流约为恒流充电电流的1/10即0.1C。TI文档说明预充电电流通常为正常快速充电电流的十分之一或二十分之一。"},
+{q:"锂电池涓流充电阶段主要针对的电池电压条件是：",o:["电池电压高于4.2V","电池电压低于3V","电池电压等于3.7V","电池电压在4.0V以上"],a:"B",e:"当电池电压低于约3V时进入涓流/预充电阶段，以小电流对深放电电池进行恢复性充电，保护电池安全。"},
+{q:"锂电池恒流充电阶段，电池电压的变化趋势是：",o:["迅速下降","保持不变","逐步升高至充电截止电压","先升后降"],a:"C",e:"恒流充电阶段电流恒定（0.2C~1.0C），电池电压逐步升高，直至达到充电截止电压（如4.2V），然后切换到恒压充电。"},
+{q:"充电终止判断最常用的方法是：",o:["充电时间到后直接断电","当恒压阶段充电电流降至截止电流（如0.02C~0.07C）时终止","电池温度升到最高时终止","SOC显示100%即终止"],a:"B",e:"充电终止有两种典型方法：最小电流法（当CV阶段充电电流降至0.02C~0.07C时终止）或定时器法，也可两者结合。"},
+{q:"某电池充电过程中，恒流阶段电压上升缓慢且充电时间明显偏长，最可能的原因是：",o:["电池容量增加","电池内阻增大或充电电流设置偏低","充电器功率过高","电池温度过低"],a:"B",e:"内阻增大导致相同电流下极化电压增大、总充电时间延长；充电电流偏低则直接导致充电速率下降。"},
+{q:"在整机充电测试中，判定充电曲线良好的关键指标包括：",o:["充电时间越短越好，不考虑温度","各阶段电压/电流曲线平滑无跳变，恒压截止电流符合规格，温升在限值内","只要最终能充到100%即可","充电电流越大越好"],a:"B",e:"良好的充电曲线应满足：各阶段曲线平滑无异常跳变、CV截止电流符合规格、充电温升在安全限值内、充电时间在合理范围内。"},
+{q:"低温环境下（低于0℃），锂离子电池充电时最需要关注的风险是：",o:["电池容量突然增大","负极析锂导致不可逆容量损失和安全风险","电池内阻减小","充电速度加快"],a:"B",e:"低温下锂离子在负极的嵌入速率降低，容易在负极表面析出金属锂（析锂），导致不可逆容量损失，严重时可能刺穿隔膜引发内短路。"},
+{q:"低温下锂离子电池放电容量相比常温通常：",o:["明显增大","基本不变","显著降低，且电压平台下降","只有高温下才会降低"],a:"C",e:"低温下电解液粘度增大、锂离子扩散速率降低，导致电池内阻增大，可用容量显著降低，放电电压平台下移。"},
+{q:"0V禁充功能的核心目的是：",o:["提高充电速度","防止对内部短路的电池持续充电而引发热失控","增加电池容量","降低整机功耗"],a:"B",e:"0V禁充由保护IC通过检测VCC端口电压实现。当电池电压低于阈值时，保护IC输出控制信号关断充电回路开关管。电池电压为0V可能意味着内部短路，持续充电有热失控风险。"},
+{q:"Android Thermal框架中，用于报告温度传感器读数和热严重等级的是：",o:["PowerManager","Thermal HAL","BatteryManager","SensorManager"],a:"B",e:"Thermal HAL 2.0的硬件接口包括皮肤、电池、GPU、CPU和USB端口的温度传感器，向多个客户端提供热传感器读数和相关严重等级。"},
+{q:"Android Thermal框架中，设备表面温度被列为最重要的追踪对象，原因是：",o:["表面温度直接影响屏幕显示效果","表面温度直接关系到用户手持体验和设备表面热限值","表面温度与电池容量成正比","表面温度只影响充电速度"],a:"B",e:"Android官方文档明确指出：设备表面温度是保持设备表面温度在规定热限值内最重要的追踪系统。"},
+{q:"MTK平台中，JEITA温度保护的核心作用是：",o:["根据电池温度分段调整充电电流和电压","控制屏幕亮度","调整Wi-Fi功率","管理GPS定位精度"],a:"A",e:"MTK驱动通过软件JEITA方案实现基于电池温度的分段充电管理，将温度划分为多个区间（T1~T5），每个区间对应不同的充电电流和电压策略。"},
+{q:"MTK平台中，当thermal策略决定限制充电电流时，通过调用哪个接口实现：",o:["set_gpu_freq","set_cur_state","set_cpu_affinity","set_display_brightness"],a:"B",e:"当系统温度升高时，温控策略通过调用冷却设备的set_cur_state来限制充电电流。MTK驱动通过电源供应属性支持在线状态、电压、电流、温度等参数设置。"},
+{q:"展锐平台中，用于配置充电温度保护阈值的DTS参数通常包括：",o:["temp-cool-down、temp-warm-up、temp-overheat","cpu-freq-min、cpu-freq-max","gpu-throttle-level","display-refresh-rate"],a:"A",e:"展锐平台DTS中常见的温度保护参数：temp-cool-down（冷却温度阈值）、temp-warm-up（加热温度阈值）、temp-overheat（过热保护温度）。"},
+{q:"电池NTC热敏电阻的阻值随温度变化的规律是：",o:["温度升高，阻值增大","温度升高，阻值减小","温度升高，阻值不变","阻值随温度线性变化"],a:"B",e:"NTC全称Negative Temperature Coefficient，即负温度系数热敏电阻。其电阻值随温度升高而减小，这一特性使其能够将电池温度变化转换为可测量的电阻/电压信号。"},
+{q:"电池NTC在过充保护中的典型作用机制是：",o:["温度超过阈值时，NTC阻值急剧下降，使自放电电流大于充电电流，中断过充过程","温度超过阈值时，NTC阻值急剧上升，直接切断充电回路","温度超过阈值时，NTC向整机软件发送中断信号","NTC仅用于温度显示，不参与保护"],a:"A",e:"专利CN203038986U公开了一种动力电池安全顶盖方案：NTC与负极柱连接，温度在80℃以下时阻值约1MΩ，一旦温度达到80℃，NTC阻值突降至约100mΩ，使得正负极柱导通，自放电电流大于充电电流，从而中断过充过程。"},
+{q:"在电池NTC精度检测中，用于校准的高精度标准温度传感器精度通常要求优于：",o:["1℃","0.5℃","0.1℃","5℃"],a:"C",e:"电池温度精度检测时，需将高精度标准温度传感器（通常精度优于0.1℃）与被测NTC一同置于恒温介质中对比测量，以标准传感器读数为基准评估NTC的测温误差。"},
+{q:"NTC的B值（热敏指数）的定义公式中，涉及的两个温度点通常是：",o:["0℃和100℃","25℃和50℃（或25℃和85℃）","-40℃和25℃","25℃和125℃"],a:"B",e:"B值通过两个温度点的零功率电阻值计算得出，典型计算温度点为25℃和50℃（B25/50）或25℃和85℃（B25/85）。公式：B=[Ta×Tb/(Tb-Ta)]×ln(Ra/Rb)。"}
+],
+
+multi:[
+{q:"锂离子电池主要组成包括：",o:["正极","负极","电解液","隔膜","水"],a:["A","B","C","D"],e:"锂离子电池由正极（如钴酸锂/磷酸铁锂）、负极（石墨）、电解液（有机溶剂+锂盐）、隔膜（聚烯烃微孔膜）组成。不含水。"},
+{q:"BMS 或保护 IC 的常见功能包括：",o:["过充保护","过放保护","过流/短路保护","温度监测","屏幕触摸控制"],a:["A","B","C","D"],e:"BMS/保护IC负责过充保护、过放保护、过流/短路保护、温度监测。屏幕触摸与BMS无关。"},
+{q:"关于锂电池充电四个阶段，以下说法正确的有：",o:["涓流充电用于对完全放电的电池进行预充，电流约为恒流充电电流的1/10","恒流充电阶段充电电流在0.2C至1.0C之间，电池电压逐步升高","恒压充电阶段保持电压恒定，电流逐渐减小","充电终止可通过最小充电电流判断或采用定时器方法","涓流充电阶段应在满电后持续进行以保持电量"],a:["A","B","C","D"],e:"E错误：锂离子电池满电后不可持续涓流充电，过充会损伤电池。"},
+{q:"判定一条充电曲线是否良好/通过，需要考察的维度包括：",o:["各阶段电压电流曲线平滑、无异常跳变","充电终止电流符合规格要求（如≤0.05C）","充电过程中电池温升在安全限值内","充电时间在合理范围内，无明显异常偏慢","充电电流越大越好"],a:["A","B","C","D"],e:"E错误：充电电流并非越大越好，过大电流会导致温升过高、析锂风险增加。"},
+{q:"常用电池/整机功耗测试仪器包括：",o:["可编程电源","电子负载","电池模拟器","数据采集器/功率分析仪","万用表"],a:["A","B","C","D","E"],e:"以上仪器均可用于电池/整机功耗测试。可编程电源模拟电池输出，电子负载模拟放电，电池模拟器可编程内阻和SOC。"},
+{q:"关于锂离子电池高低温特性，以下说法正确的有：",o:["低温下电池内阻增大，欧姆内阻变化率高于极化内阻变化率","高温下电池容量通常比低温下更高","低温下SOC-OCV曲线整体下移","锂离子电池充电温度范围通常为0℃~45℃","温度对电池性能没有影响"],a:["A","B","C","D"],e:"E错误：温度对电池性能有显著影响。低温下电解液粘度增大导致离子迁移速率降低，内阻增大、容量降低、OCV曲线下移。"},
+{q:"关于Android Thermal框架，以下说法正确的有：",o:["Thermal HAL 2.0的硬件接口包括皮肤、电池、GPU、CPU和USB端口的温度传感器","任何会限制设备性能的因素（包括电池电量限制）都必须通过Thermal HAL报告","thermal服务通过IThermalEventListener和IThermalStatusListener两个回调接口向客户端提供热状态反馈","Thermal框架中的热状态等级从0（无限制）到6（设备关机）","Thermal框架只能由OEM厂商使用，应用开发者无法获取热状态"],a:["A","B","C","D"],e:"E错误：Android应用可通过PowerManager注册回调获取热状态。IThermalStatusListener专门为Android应用提供热状态反馈。"},
+{q:"关于MTK平台的充电温控策略，以下说法正确的有：",o:["MTK通过软件JEITA方案实现基于电池温度的分段充电管理","JEITA温区中，低温区（T1~T2）建议将充电电流降低至设定值的一半或更低","高温区（T3~T5）充电电压可降至4.1V，充电电流降至快速充电电流的50%","当系统温度升高时，温控策略会通过调用set_cur_state来限制充电电流","MTK平台的充电温控仅依赖软件实现，与充电IC硬件无关"],a:["A","B","C","D"],e:"E错误：MTK充电温控依赖充电IC硬件与软件配合实现。sw_jeita_data存储软件JEITA数据，do_sw_jeita_state_machine状态机根据电池温度更新状态。"},
+{q:"关于电池NTC的设计目的，以下说法正确的有：",o:["实时侦测电芯温度，为BMS提供温度数据基础","配合JEITA标准实现分段充电管理，高温/低温限流或断充","防止电池在过充或短路条件下因热积累导致热失控","作为电池身份识别（ID）电阻的替代方案","NTC温度数据可用于整机Thermal策略中的电池温度上报"],a:["A","B","C","E"],e:"电池NTC的核心设计目的是实时侦测电芯温度，使BMS和充电IC能够根据温度高低进行限流或断流。D错误：ID电阻用于电池身份识别，NTC用于温度检测，两者功能不同。"},
+{q:"NTC测温精度测试中，以下哪些是影响测试结果的关键因素：",o:["恒温介质的温度稳定性和均匀性","标准温度传感器的精度等级","测试时NTC是否处于零功率状态（避免自热效应）","NTC的B值容差和R25电阻容差","测试环境的湿度"],a:["A","B","C","D"],e:"恒温槽温度控制精度直接影响对比测量结果，标准传感器精度决定误差基准的可靠性。NTC自热效应会导致测温偏差，需确保零功率条件。B值容差（典型±1%~±3%）和R25容差（典型±1%~±5%）直接决定测温误差。湿度影响极小。"}
+],
+
+tf:[
+{q:"锂离子电池没有明显记忆效应，通常可以随用随充。",a:"T",e:"正确。锂离子电池不存在镍镉电池的记忆效应，可以随用随充，但应避免长期处于满电或完全放电状态。"},
+{q:"Wh 比 mAh 更适合比较不同电压电池的能量大小。",a:"T",e:"正确。Wh = 电压(V) × 容量(Ah)，考虑了电压因素，是能量单位；mAh仅表示电荷量。"},
+{q:"充电电流越大越好，越大越能保护电池寿命。",a:"F",e:"错误。过大的充电电流会导致温升过高、析锂风险增加，加速电池老化。"},
+{q:"低温下锂离子电池可以接受与大电流常温相同的充电策略。",a:"F",e:"错误。低温下必须降低充电电流，JEITA标准建议T1~T2低温区将充电电流降低至设定值的一半或更低。"},
+{q:"SOC=100% 一定表示电池实际容量等于额定容量。",a:"F",e:"错误。SOC=100%表示当前可用容量已充满，但老化电池的实际满充容量可能低于额定容量。"},
+{q:"电池内阻越小，大电流放电性能通常越好。",a:"T",e:"正确。内阻越小，相同放电电流下电压降越小，可用功率越高，发热越少。"},
+{q:"过充保护只由整机软件实现，与 BMS/保护 IC 无关。",a:"F",e:"错误。过充保护由保护IC硬件实现（一次保护）和软件策略（二次保护）共同完成。"},
+{q:"关机充电需要验证充电图标、电量显示、开机唤醒和充电电流。",a:"T",e:"正确。关机充电是整机充电测试的重要场景，需验证UI显示正确性、充电电流是否正常、能否正常开机唤醒。"},
+{q:"涓流充电阶段的电流值约为恒流充电电流的1/10。",a:"T",e:"正确。涓流/预充电电流约为恒流充电电流的十分之一（0.1C）。"},
+{q:"恒流充电阶段电池电压保持不变，直到进入恒压阶段才开始升高。",a:"F",e:"错误。恒流充电阶段电流恒定，电压逐步升高至充电截止电压，然后切换到恒压阶段。"},
+{q:"恒压充电阶段，当充电电流降至设定的截止电流时，充电终止。",a:"T",e:"正确。这是最小电流法判断充电终止的标准做法，截止电流典型值为0.02C~0.07C。"},
+{q:"充电终止方法只有最小电流法一种，定时器法已被淘汰。",a:"F",e:"错误。充电终止有两种典型方法：最小电流法和定时器法（从恒压阶段开始计时，持续2小时后终止），也可两者结合。"},
+{q:"判定充电曲线是否良好时，恒流阶段的电压波动和恒压阶段的截止电流是重要考察指标。",a:"T",e:"正确。恒流阶段电压应平稳上升无跳变，恒压阶段截止电流应符合规格要求。"},
+{q:"良好的充电曲线应保证充电过程中电池温度在安全范围内，无异常温升。",a:"T",e:"正确。充电温升是判定充电曲线是否合格的关键维度之一。"},
+{q:"低温搁置后电池放电容量在恢复室温后可以部分恢复。",a:"T",e:"正确。低温导致容量下降主要是可逆的，恢复室温后大部分容量可以恢复，但长期低温循环可能造成不可逆衰减。"},
+{q:"0V禁充保护一旦触发，电池将永久不可恢复充电。",a:"F",e:"错误。某些平台/方案允许在特定条件下对深放电电池进行小电流恢复充电，但需以电池供应商规格为准。"},
+{q:"高温环境下电池容量变化速率小于低温环境下的容量变化速率。",a:"T",e:"正确。低温时容量随温度降低而迅速下降，高温时容量随温度升高而缓慢增加，变化速率不对称。"},
+{q:"Android Thermal框架中，thermal服务只能由系统内部使用，第三方应用无法获取热状态信息。",a:"F",e:"错误。第三方应用可通过PowerManager注册热状态回调（IThermalStatusListener）获取热压力通知。"},
+{q:"MTK平台JEITA方案中，当电池温度从49°C冷却到48°C时，充电策略可从T4区间切换回T3区间。",a:"T",e:"正确。JEITA状态机支持温度回滞切换。do_sw_jeita_state_machine根据电池温度更新状态，温度降低后可从高温区间切换回较低温区间。"},
+{q:"展锐平台中，temp-overheat参数用于设置过热保护温度，超过此温度将停止充电。",a:"T",e:"正确。展锐平台DTS中temp-overheat参数定义过热保护温度阈值，超过此温度将停止充电。"},
+{q:"NTC热敏电阻的测温原理是：温度变化导致NTC阻值变化，通过分压电路转换为电压信号，由ADC采样后计算出温度值。",a:"T",e:"正确。BMS温度采集系统通常由NTC、电阻分压电路、ADC采样电路和MCU组成。NTC阻值随温度变化，分压电路将阻值变化转换为电压变化，ADC采样后由MCU根据R-T关系计算温度。"},
+{q:"电池在充放电状态下检测NTC电阻时，检测精度不受充放电电流影响，因此无需停止充放电即可准确测量。",a:"F",e:"错误。充放电电流在公共电路上会产生额外电压，导致NTC电阻检测误差率可达14.8%~31.9%，且误差随充放电电流增大而增大。高精度检测时需控制电池停止充放电或以小电流操作。"},
+{q:"NTC热时间常数τ是指环境温度阶跃变化时，NTC温度变化达到总温差63.2%所需的时间。",a:"T",e:"正确。根据IEC 60539-1标准，τ定义为环境温度阶跃变化时，NTC温度变化达到总温差63.2%所需的时间。"},
+{q:"NTC的B值越大，表示其电阻-温度曲线的斜率越大，温度灵敏度越高。",a:"T",e:"正确。B值（热敏指数）反映电阻-温度曲线的斜率。B值越大，相同温度变化下NTC阻值变化越大，对温度的灵敏度越高。"}
+],
+
+fill:[
+{q:"锂离子电池典型充电过程为________、________、________和________四个阶段。",a:["涓流","恒流","恒压","终止"],e:"完整充电流程包括涓流（预充）、恒流、恒压、充电终止四个阶段。"},
+{q:"电池健康状态英文缩写是________。",a:["SOH"],e:"SOH（State of Health）表示电池健康状态，通常以当前实际容量与额定容量的百分比衡量。"},
+{q:"锂电池恒流充电电流通常在________C至________C之间。",a:["0.2","1"],e:"恒流充电电流一般在0.2C至1.0C之间，具体值取决于电芯规格和充电策略设计。"},
+{q:"锂离子电池充电温度范围通常为________℃至________℃。",a:["0","45"],e:"锂离子电池推荐充电温度范围为0℃~45℃。低于0℃充电有析锂风险，高于45℃充电加速老化。"},
+{q:"Android Thermal HAL中，设备表面温度传感器对应的类型名称为________。",a:["skin"],e:"Android Thermal HAL 2.0中，设备表面温度传感器类型为skin，是保持设备表面温度在热限值内最重要的追踪对象。"},
+{q:"MTK平台通过________（英文缩写）方案实现基于电池温度的分段充电管理。",a:["JEITA"],e:"MTK驱动通过软件JEITA方案实现分段充电管理，sw_jeita_data存储JEITA数据。"},
+{q:"NTC全称为________，其电阻值随温度升高而________。",a:["负温度系数","减小"],e:"NTC = Negative Temperature Coefficient，即负温度系数。其核心特性为电阻值随温度升高而减小。"},
+{q:"NTC精度测试中，B值的偏差通常要求控制在________%~________%范围内。",a:["1","3"],e:"NTC的B值容差通常为±1%~±3%，高精度NTC可达到±1%。B值精度直接影响温度计算的准确性。"},
+{q:"电池NTC在全工作温度区间内的测温误差通常要求控制在________℃甚至________℃以内。",a:["1","0.5"],e:"锂电池温度精度检测中，通常要求全工作温度范围（如-40℃至85℃）内测量误差控制在±1℃甚至±0.5℃以内。"}
+],
+
+term:[
+{q:"DCR（直流内阻）",a:"DCR即直流内阻，电池在直流放电条件下端电压变化量与电流变化量之比（ΔV/ΔI），反映电池在大电流放电时内部阻抗导致的电压降和功率损耗。",e:"评分要点：定义2分，意义1分。"},
+{q:"OCV（开路电压）",a:"OCV即开路电压，电池在无负载、静置足够时间后两端的稳态电压。与SOC存在对应关系，是BMS进行SOC估算的重要依据。",e:"评分要点：定义2分，作用1分。"},
+{q:"EIS（电化学阻抗谱）",a:"EIS即电化学阻抗谱，在电池上施加小幅交流信号，测量不同频率下的阻抗响应。高频区半圆对应电荷转移阻抗（Rct），低频区斜线对应扩散阻抗（Warburg阻抗）。",e:"评分要点：定义2分，解读1分。"},
+{q:"C-rate（充放电倍率）",a:"C-rate即充放电倍率，充放电电流与电池额定容量的比值，1C表示以额定容量数值的电流充放电。例如3000mAh电池以1C充电即3000mA。",e:"评分要点：定义2分，举例1分。"},
+{q:"DOD（放电深度）",a:"DOD即放电深度，电池已放出的容量占额定容量的百分比。DOD=100%表示完全放电，DOD越大对电池循环寿命影响越大。",e:"评分要点：定义2分，与寿命关系1分。"},
+{q:"JEITA",a:"JEITA（Japan Electronics and Information Technology Industries Association）制定的锂电池充电温度管理标准，将电池温度划分为多个区间，在不同温区下对充电电流和充电电压进行分段调整。",e:"评分要点：全称或含义1分，核心机制2分。"},
+{q:"Thermal HAL",a:"Thermal HAL是Android硬件抽象层中的热管理接口，定义了温度传感器读取、热严重等级报告和冷却设备控制的标准API。Thermal HAL 2.0硬件接口包括皮肤、电池、GPU、CPU和USB端口的温度传感器。",e:"评分要点：定义2分，功能1分。"},
+{q:"dV/dQ曲线",a:"dV/dQ曲线是电池充电过程中电压对容量的微分曲线，其峰值反映正负极活性物质在脱锂和嵌锂过程中的相变。dV/dQ绝对值越小的SOC区间可选择更大倍率充电。",e:"评分要点：定义2分，应用1分。"},
+{q:"B值（热敏指数）",a:"B值是NTC热敏电阻的材料常数，反映电阻-温度曲线的斜率，单位为K。通过两个温度点（如25℃和85℃）的零功率电阻值计算得出：B = [Ta×Tb/(Tb-Ta)] × ln(Ra/Rb)。B值越大，NTC对温度变化的灵敏度越高。",e:"评分要点：定义1.5分，公式1分，物理意义0.5分。"},
+{q:"热时间常数（τ）",a:"热时间常数是NTC在零功率状态下，环境温度发生阶跃变化时，其温度变化达到总温差63.2%所需的时间。τ越小，NTC对温度变化的响应速度越快。测试通常在恒温油槽中进行，将NTC从温度T0快速移至T1，记录电阻值变化至63.2%阶跃值的时间。",e:"评分要点：定义2分，测试方法1分。"}
+],
+
+short:[
+{q:"请详细描述锂离子电池充电的四个阶段（涓流充电、恒流充电、恒压充电、充电终止），包括每个阶段的：触发条件（电压/电流阈值）、该阶段的目的、电压和电流的变化特性、终止/切换条件。",s:8,
+a:"【涓流充电（低压预充）】触发条件：电池电压低于3V左右；目的：对完全放电的电池进行预充（恢复性充电），保护电池安全；特性：以小电流（约0.1C，即恒流电流的1/10）充电，电压缓慢上升；切换条件：电压上升到约3V以上时切换到恒流充电。<br>【恒流充电】触发条件：电池电压上升到预充阈值以上；目的：快速将电池充至接近满电；特性：充电电流在0.2C至1.0C之间恒定，电压逐步升高至充电截止电压（如4.2V）；切换条件：电压达到充电截止电压时切换到恒压充电。<br>【恒压充电】触发条件：电池电压达到充电截止电压；目的：在安全电压下将电池充至接近100%容量；特性：保持充电电压恒定，充电电流根据电芯饱和程度逐渐减小；切换条件：充电电流减小到截止电流时充电终止。<br>【充电终止】两种典型方法：最小电流法（监视恒压阶段充电电流，减小到0.02C~0.07C时终止）或定时器法（从恒压阶段开始计时，持续2小时后终止），也可两者结合。目的：安全结束充电，防止过充。"},
+{q:"在整机充电测试中，如何判定一条充电曲线是“良好/通过”的？请从以下维度说明判定标准：各阶段曲线形态、充电截止电流、充电温升、充电时间合理性。",s:6,
+a:"【各阶段曲线形态】涓流阶段电流小且平稳；恒流阶段电压线性上升、无异常跳变；恒压阶段电流平滑下降；各阶段切换点电压/电流无突跳。<br>【充电截止电流】恒压阶段充电电流降至截止电流（典型0.02C~0.07C）时正常终止，不得出现过早终止或无法终止。<br>【充电温升】充电过程中电池温度和整机表面温度在安全限值内，无异常温升，温升速率合理。<br>【充电时间合理性】完整充电时间在合理范围内（如0.2C~1.0C恒流充电，全程约2.5~3小时），无明显异常偏慢或偏快。<br>【补充加分项】充电曲线一致性（多台设备/多次充电曲线重合度高）；无析锂风险（dV/dQ曲线在充电末期无异常）。"},
+{q:"请回答以下关于Android Thermal策略的问题：（1）Android Thermal策略设计的核心目的是什么？（2）Android Thermal框架中，常见的温控执行措施有哪些（至少列出3种）？（3）Thermal HAL 2.0相对于Thermal HAL 1.0有哪些主要改进？",s:6,
+a:"（1）核心目的：确保设备在过热时保持一致的用户体验，避免设备表面温度超过指定热限值，同时防止电池和芯片因过热而损坏。通过thermal数据在设备开始过热时触发相应的缓解措施。<br>（2）常见温控执行措施：CPU/GPU降频、充电电流限制、屏幕亮度降低、后台任务限制、框架级热关机、USB端口充电功率限制。<br>（3）Thermal HAL 2.0改进：相比1.0的轮询接口，2.0提供抽象硬件接口，支持皮肤、电池、GPU、CPU和USB端口传感器，支持回调机制（IThermalChangedCallback）主动通知热状态变化，任何限制设备性能的因素都必须通过Thermal HAL报告。"},
+{q:"请回答以下关于平台电池安全策略的问题：（1）MTK平台JEITA温度保护的工作原理是什么？（2）展锐平台中，充电温度保护参数通常包括哪些？各自的含义是什么？",s:6,
+a:"（1）MTK JEITA原理：MTK驱动通过软件JEITA方案实现分段充电管理，将温度划分为T1~T5多个区间。低温区（T1~T2）充电电流降低至设定值的一半或更低；常温区（T2~T3）正常充电电流和电压；高温区（T3~T5）充电电压降至4.1V，充电电流降至快速充电电流的50%；极端温区停止充电。当温度升高时，温控策略调用冷却设备的set_cur_state限制充电电流。<br>（2）展锐平台参数：temp-cool-down—冷却温度阈值，超过此温度时降低充电电流；temp-warm-up—加热温度阈值，低于此温度时可能降低充电电流；temp-overheat—过热保护温度，超过此温度停止充电。此外还通过DTS中的JEITA温度表配置不同温区对应的充电电流和电压参数。"},
+{q:"请设计一套电池NTC精度测试方案，说明测试目的、测试设备、测试步骤和合格判定标准。",s:6,
+a:"【测试目的】验证电池NTC在不同温度下的测温精度是否满足设计规格，确保BMS温度保护策略的可靠性。<br>【测试设备】恒温槽（油槽或水槽，温度控制精度≤±0.1℃）、高精度标准温度传感器（精度优于0.1℃）、高精度数字万用表（六位半以上）、数据采集系统。<br>【测试步骤】1）将NTC与标准温度传感器一同置于恒温槽中，确保二者热接触良好；2）设置恒温槽至多个温度测试点（如-20℃、0℃、25℃、45℃、60℃、85℃），每个温度点稳定至少15分钟；3）在每个温度点读取NTC的电阻值（采用四线法消除引线电阻影响）和标准传感器温度值；4）根据NTC的R-T关系表或B值公式计算NTC测得的温度值；5）计算NTC温度与标准传感器温度的偏差；6）对多台样品重复测试，评估一致性和最坏情况误差。<br>【合格判定标准】各温度点测温误差在规格范围内（如±1℃或±0.5℃）；B值偏差在±1%~±3%以内；多台样品间一致性良好，无明显离散；热时间常数符合规格。"}
+]
+};
+
+/* ============ 渲染 ============ */
+function render(){
+  let h='';
+  DATA.single.forEach((it,i)=>{
+    h+='<div class="q" id="q-s-'+i+'"><div class="q-h"><span class="q-n">第'+(i+1)+'题</span><span class="q-t">'+it.q+'</span><span class="q-s">3分</span></div><div class="opts">';
+    it.o.forEach((op,j)=>{h+='<label class="opt" onclick="pick(this)"><input type="radio" name="s_'+i+'" value="'+L[j]+'"><span>'+L[j]+'. '+op+'</span></label>';});
+    h+='</div><div class="exp" id="exp-s-'+i+'"></div></div>';
+  });
+  document.getElementById('sec-single').innerHTML=h;
+
+  h='';
+  DATA.multi.forEach((it,i)=>{
+    h+='<div class="q" id="q-m-'+i+'"><div class="q-h"><span class="q-n">第'+(i+1)+'题</span><span class="q-t">'+it.q+'</span><span class="q-s">4分</span></div><div class="opts">';
+    it.o.forEach((op,j)=>{h+='<label class="opt" onclick="pickM(this)"><input type="checkbox" name="m_'+i+'" value="'+L[j]+'"><span>'+L[j]+'. '+op+'</span></label>';});
+    h+='</div><div class="exp" id="exp-m-'+i+'"></div></div>';
+  });
+  document.getElementById('sec-multi').innerHTML=h;
+
+  h='';
+  DATA.tf.forEach((it,i)=>{
+    h+='<div class="q" id="q-t-'+i+'"><div class="q-h"><span class="q-n">第'+(i+1)+'题</span><span class="q-t">'+it.q+'</span><span class="q-s">2分</span></div><div class="opts opt-row">';
+    h+='<label class="opt" onclick="pick(this)"><input type="radio" name="t_'+i+'" value="T"><span>√ 正确</span></label>';
+    h+='<label class="opt" onclick="pick(this)"><input type="radio" name="t_'+i+'" value="F"><span>× 错误</span></label>';
+    h+='</div><div class="exp" id="exp-t-'+i+'"></div></div>';
+  });
+  document.getElementById('sec-tf').innerHTML=h;
+
+  h='';
+  DATA.fill.forEach((it,i)=>{
+    h+='<div class="q"><div class="q-h"><span class="q-n">第'+(i+1)+'题</span><span class="q-t">'+it.q+'</span><span class="q-s">2分</span></div>';
+    h+='<input class="tin" type="text" name="f_'+i+'" placeholder="请输入答案" oninput="bar()">';
+    h+='<div class="exp" id="exp-f-'+i+'"></div></div>';
+  });
+  document.getElementById('sec-fill').innerHTML=h;
+
+  h='';
+  DATA.term.forEach((it,i)=>{
+    h+='<div class="q"><div class="q-h"><span class="q-n">第'+(i+1)+'题</span><span class="q-t">'+it.q+'</span><span class="q-s">3分</span></div>';
+    h+='<textarea name="e_'+i+'" placeholder="请输入名词解释" oninput="bar()"></textarea>';
+    h+='<div class="exp" id="exp-e-'+i+'"></div></div>';
+  });
+  document.getElementById('sec-term').innerHTML=h;
+
+  h='';
+  DATA.short.forEach((it,i)=>{
+    h+='<div class="q"><div class="q-h"><span class="q-n">第'+(i+1)+'题</span><span class="q-t">'+it.q+'</span><span class="q-s">'+it.s+'分</span></div>';
+    h+='<textarea name="a_'+i+'" placeholder="请输入你的回答" style="min-height:130px" oninput="bar()"></textarea>';
+    h+='<div class="exp" id="exp-a-'+i+'"></div></div>';
+  });
+  document.getElementById('sec-short').innerHTML=h;
+}
+
+/* ============ 交互 ============ */
+function pick(el){
+  const p=el.parentNode;
+  p.querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+  bar();
+}
+function pickM(el){
+  const inp=el.querySelector('input');
+  if(el.classList.contains('sel')){el.classList.remove('sel');inp.checked=false;}
+  else{el.classList.add('sel');inp.checked=true;}
+  bar();
+}
+function countAns(){
+  let c=0;const T=84;
+  for(let i=0;i<26;i++) if(document.querySelector('input[name="s_'+i+'"]:checked')) c++;
+  for(let i=0;i<10;i++) if(document.querySelector('input[name="m_'+i+'"]:checked')) c++;
+  for(let i=0;i<24;i++) if(document.querySelector('input[name="t_'+i+'"]:checked')) c++;
+  for(let i=0;i<9;i++)  if(document.querySelector('input[name="f_'+i+'"]').value.trim()) c++;
+  for(let i=0;i<10;i++) if(document.querySelector('textarea[name="e_'+i+'"]').value.trim()) c++;
+  for(let i=0;i<5;i++)  if(document.querySelector('textarea[name="a_'+i+'"]').value.trim()) c++;
+  return {c,T};
+}
+function bar(){
+  const {c,T}=countAns();
+  document.getElementById('barFill').style.width=(c/T*100)+'%';
+  document.getElementById('barTxt').textContent='已答 '+c+' / '+T+' 题';
+}
+
+/* ============ 评分 ============ */
+let objScore=0, subjMax=62;
+
+function submitQuiz(){
+  const {c,T}=countAns();
+  if(c<T*0.5 && !confirm('你只回答了 '+c+'/'+T+' 题，确定要提交吗？')) return;
+
+  objScore=0;
+
+  /* 单选 */
+  DATA.single.forEach((it,i)=>{
+    const sel=document.querySelector('input[name="s_'+i+'"]:checked');
+    const v=sel?sel.value:null;
+    const ok=(v===it.a);
+    if(ok) objScore+=3;
+    document.querySelectorAll('input[name="s_'+i+'"]').forEach(inp=>{
+      const lab=inp.closest('.opt');
+      if(inp.value===it.a) lab.classList.add('ok');
+      else if(inp.value===v) lab.classList.add('no');
+    });
+    showExp('exp-s-'+i,ok,it.a,it.e);
+  });
+
+  /* 多选 */
+  DATA.multi.forEach((it,i)=>{
+    const sels=[...document.querySelectorAll('input[name="m_'+i+'"]:checked')].map(x=>x.value).sort();
+    const ans=[...it.a].sort();
+    let pts=0;
+    if(sels.length===ans.length && sels.every((v,j)=>v===ans[j])) pts=4;
+    else if(sels.length>0 && sels.every(v=>ans.includes(v))) pts=2;
+    objScore+=pts;
+    document.querySelectorAll('input[name="m_'+i+'"]').forEach(inp=>{
+      const lab=inp.closest('.opt');
+      if(it.a.includes(inp.value)) lab.classList.add('ok');
+      else if(sels.includes(inp.value)) lab.classList.add('no');
+    });
+    showExp('exp-m-'+i,pts===4,it.a.join('、'),it.e+(pts===2?'<br><b>（部分正确，得2分）</b>':''));
+  });
+
+  /* 判断 */
+  DATA.tf.forEach((it,i)=>{
+    const sel=document.querySelector('input[name="t_'+i+'"]:checked');
+    const v=sel?sel.value:null;
+    const ok=(v===it.a);
+    if(ok) objScore+=2;
+    showExp('exp-t-'+i,ok,it.a==='T'?'√ 正确':'× 错误',it.e);
+  });
+
+  /* 填空 */
+  DATA.fill.forEach((it,i)=>{
+    const val=document.querySelector('input[name="f_'+i+'"]').value.replace(/\s/g,'').toLowerCase();
+    let hit=0;
+    it.a.forEach(k=>{ if(val.includes(k.toLowerCase())) hit++; });
+    let pts=0;
+    if(hit===it.a.length) pts=2;
+    else if(hit>0) pts=1;
+    objScore+=pts;
+    showExp('exp-f-'+i,pts===2,it.a.join(' / '),it.e+(pts===1?'<br><b>（部分正确，得1分）</b>':''));
+  });
+
+  /* 名词解释 */
+  DATA.term.forEach((it,i)=>{
+    const el=document.getElementById('exp-e-'+i);
+    el.className='exp show info';
+    el.innerHTML='<b>📖 参考答案与评分要点（3分）</b><span class="ans">'+it.a+'</span><br>'+it.e
+      +'<div class="self">自评得分：<input type="number" class="ss" min="0" max="3" step="0.5" value="0" oninput="calcTotal()"> / 3 分</div>';
+  });
+
+  /* 简答 */
+  DATA.short.forEach((it,i)=>{
+    const el=document.getElementById('exp-a-'+i);
+    el.className='exp show info';
+    el.innerHTML='<b>📖 参考答案与评分要点（'+it.s+'分）</b><span class="ans" style="font-size:12.5px;line-height:1.7">'+it.a+'</span>'
+      +'<div class="self">自评得分：<input type="number" class="ss" min="0" max="'+it.s+'" step="0.5" value="0" oninput="calcTotal()"> / '+it.s+' 分</div>';
+  });
+
+  document.getElementById('btnSubmit').disabled=true;
+  document.getElementById('btnSubmit').textContent='已提交';
+  const btn2=document.createElement('button');
+  btn2.className='btn2'; btn2.textContent='重新答题';
+  btn2.onclick=()=>location.reload();
+  document.getElementById('submitArea').appendChild(btn2);
+
+  document.getElementById('panel').classList.add('show');
+  calcTotal();
+  document.getElementById('panel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function showExp(id,ok,ans,exp){
+  const el=document.getElementById(id);
+  el.className='exp show '+(ok?'ok':'no');
+  el.innerHTML='<b>'+(ok?'✅ 回答正确':'❌ 回答错误')+'</b>正确答案：<span class="ans">'+ans+'</span><br>'+exp;
+}
+
+function calcTotal(){
+  let subj=0;
+  document.querySelectorAll('.ss').forEach(i=>{ subj+=parseFloat(i.value)||0; });
+  const total=objScore+subj;
+  document.getElementById('bigScore').textContent=(Math.round(total*10)/10);
+
+  let grade,gc,adv;
+  const r=total/246;
+  if(r>=0.9){grade='优秀';gc='#16a34a';adv='可独立承担整机电池测试，具备NTC精度测试和温控策略验证能力。建议进入进阶专项（快充协议测试、老化循环测试、温控策略调优）。';}
+  else if(r>=0.75){grade='良好';gc='#2563eb';adv='基础扎实，可执行大多数电池测试任务。需导师带教复杂异常和策略分析，重点补强充电曲线判定和Thermal策略。';}
+  else if(r>=0.6){grade='合格';gc='#f59e0b';adv='可做基础执行。建议重点补强：充电阶段原理、充电曲线判定标准、Android Thermal策略、NTC精度测试方法。';}
+  else{grade='不合格';gc='#dc2626';adv='建议系统培训后补测，暂不独立上岗。优先学习锂电池基础原理、CC-CV充电机制、JEITA温度管理标准、NTC温度检测原理。';}
+
+  document.getElementById('grade').innerHTML='<span style="color:'+gc+'">'+grade+'</span>';
+  document.getElementById('detail').innerHTML=
+    '客观题自动得分：<b>'+objScore+'</b> / 184　|　主观题自评得分：<b>'+(Math.round(subj*10)/10)+'</b> / 62';
+  document.getElementById('advice').innerHTML='<strong>💡 学习建议：</strong>'+adv;
+}
+
+/* ============ 初始化 ============ */
+render();
+bar();
+</script>
+</body>
+</html>
